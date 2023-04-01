@@ -6,7 +6,7 @@ export const AuthContext = React.createContext();
 const initialState = {
   isAuthenticated: false,
   user: null,
-  token: null,
+  token: localStorage.getItem("token"),
   role: null,
 };
 
@@ -14,8 +14,17 @@ const reducer = (state, action) => {
   switch (action.type) {
     case "LOGIN":
       //TODO
+      const { error, expire_at, role, token, two_factor_enabled, user_id } =
+        action.payload;
+      localStorage.setItem("role", role);
+      localStorage.setItem("token", token);
+      localStorage.setItem("user_id", user_id);
       return {
         ...state,
+        isAuthenticated: !error,
+        user: user_id,
+        token: token,
+        role: role,
       };
     case "LOGOUT":
       localStorage.clear();
@@ -46,6 +55,25 @@ const AuthProvider = ({ children }) => {
 
   React.useEffect(() => {
     //TODO
+
+    const sdkCheck = async () => {
+      const role = localStorage.getItem("role") ?? "admin";
+      const code = await sdk.check(localStorage.getItem("role"));
+      if (code !== 200) {
+        // dispatch({ type: "LOGOUT" });
+      } else {
+        dispatch({
+          type: "LOGIN",
+          payload: {
+            role: localStorage.getItem("role"),
+            user_id: localStorage.getItem("user_id"),
+            token: localStorage.getItem("token"),
+          },
+        });
+      }
+    };
+
+    sdkCheck();
   }, []);
 
   return (

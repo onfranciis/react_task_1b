@@ -18,6 +18,16 @@ function renderRoutes(role) {
         </Routes>
       );
       break;
+
+    case "pending":
+      return (
+        <Routes>
+          <Route path="*" element={<></>}></Route>
+          <Route exact path="/admin/login" element={<AdminLoginPage />}></Route>
+        </Routes>
+      );
+      break;
+
     default:
       return (
         <Routes>
@@ -36,10 +46,12 @@ function Main() {
     <div className="h-full">
       <div className="flex w-full">
         <div className="w-full">
-          <div className="page-wrapper w-full py-10 px-5">
-            {!state.isAuthenticated
-              ? renderRoutes("none")
-              : renderRoutes(state.role)}
+          <div className="page-wrapper w-full">
+            {state.isAuthenticated
+              ? renderRoutes(state.role)
+              : state.token
+              ? renderRoutes("pending")
+              : renderRoutes("none")}
           </div>
         </div>
       </div>
